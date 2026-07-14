@@ -6,39 +6,64 @@
 <title>被保险人声明书生成器</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+:root { --navy: #15335f; --blue: #2f67c7; --blue-dark: #2355ad; --ink: #17233b; --muted: #69758b; --line: #e3eaf4; --surface: #ffffff; --soft-blue: #f3f7fd; --green: #16865f; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f5f7fa; min-height: 100vh; padding: 16px; }
-.container { max-width: 600px; margin: 0 auto; }
-h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
-.subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 20px; }
-.card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.card-title { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-.form-group { margin-bottom: 14px; }
-.form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
-.form-group label .req { color: #e74c3c; margin-left: 2px; }
-.form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; background: #fafbfc; }
-.form-group input:focus, .form-group select:focus { border-color: #4a6cf7; background: #fff; }
-.form-row { display: flex; gap: 12px; }
-.form-row .form-group { flex: 1; }
-.vehicle-item { background: #f8f9fc; border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
-.vehicle-item .remove-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: #fee; border: none; color: #e74c3c; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
-.vehicle-item .remove-btn:hover { background: #e74c3c; color: #fff; }
-.add-btn { width: 100%; padding: 10px; border: 2px dashed #4a6cf7; border-radius: 8px; background: transparent; color: #4a6cf7; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-.add-btn:hover { background: #f0f3ff; }
-.generate-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, #4a6cf7, #6c5ce7); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
-.generate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74,108,247,0.4); }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; color: var(--ink); background: radial-gradient(circle at 15% -10%, #dbe9ff 0, transparent 34%), radial-gradient(circle at 100% 10%, #e8f1ff 0, transparent 28%), #f4f7fb; min-height: 100vh; padding: 28px 16px 40px; }
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+.container { width: 100%; max-width: 680px; margin: 0 auto; }
+.hero { position: relative; overflow: hidden; margin-bottom: 18px; padding: 28px; border: 1px solid rgba(255,255,255,0.28); border-radius: 24px; color: #fff; background: linear-gradient(135deg, #102d56 0%, #2455a4 62%, #3a79d8 100%); box-shadow: 0 20px 48px rgba(25, 67, 129, 0.22); }
+.hero::after { content: ""; position: absolute; width: 210px; height: 210px; right: -68px; top: -92px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
+.brand-line { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 650; letter-spacing: 0.04em; }
+.brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; background: rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
+.eyebrow { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); font-size: 11px; }
+h1 { position: relative; z-index: 1; margin-bottom: 8px; font-size: clamp(24px, 5vw, 30px); line-height: 1.25; letter-spacing: -0.02em; }
+.subtitle { position: relative; z-index: 1; max-width: 470px; color: rgba(255,255,255,0.76); font-size: 14px; line-height: 1.7; }
+.hero-meta { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 20px; color: rgba(255,255,255,0.88); font-size: 12px; }
+.hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta i { width: 5px; height: 5px; border-radius: 50%; background: #8fe3c3; box-shadow: 0 0 0 3px rgba(143,227,195,0.14); }
+.card { margin-bottom: 16px; padding: 22px; border: 1px solid rgba(220,229,241,0.9); border-radius: 20px; background: rgba(255,255,255,0.96); box-shadow: 0 10px 30px rgba(30, 58, 96, 0.07); }
+.card-title { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #edf1f6; }
+.step-badge { flex: 0 0 auto; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: #fff; background: linear-gradient(135deg, var(--navy), var(--blue)); box-shadow: 0 7px 16px rgba(47,103,199,0.22); font-size: 12px; font-weight: 750; letter-spacing: 0.04em; }
+.card-title strong { display: block; margin-bottom: 3px; font-size: 16px; color: var(--ink); }
+.card-title small { display: block; color: #8994a7; font-size: 12px; font-weight: 400; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 7px; color: #48566c; font-size: 13px; font-weight: 620; }
+.form-group label .req { margin-left: 3px; color: #e05252; }
+.form-group input { width: 100%; height: 46px; padding: 0 14px; border: 1px solid #dce4ef; border-radius: 11px; outline: none; color: var(--ink); background: #f9fbfd; font-size: 15px; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; }
+.form-group input::placeholder { color: #a5afbd; }
+.form-group input:focus { border-color: #5b85d5; background: #fff; box-shadow: 0 0 0 4px rgba(47,103,199,0.10); }
+.form-row { display: flex; gap: 14px; }
+.form-row .form-group { flex: 1; min-width: 0; }
+.vehicle-item { position: relative; margin-bottom: 12px; padding: 16px; border: 1px solid #e4ebf5; border-radius: 15px; background: linear-gradient(180deg, #f8faff, #fbfcfe); }
+.vehicle-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #7b879a; font-size: 12px; }
+.vehicle-index { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 24px; padding: 0 8px; border-radius: 7px; color: var(--blue-dark); background: #eaf1ff; font-weight: 700; }
+.vehicle-item .remove-btn { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 9px; color: #c94f55; background: #fff0f1; font-size: 18px; line-height: 1; cursor: pointer; transition: background 0.18s, color 0.18s; }
+.vehicle-item .remove-btn:hover { color: #fff; background: #d75d63; }
+.add-btn { width: 100%; padding: 12px; border: 1.5px dashed #85a7df; border-radius: 11px; color: var(--blue-dark); background: #f7faff; font-size: 14px; font-weight: 650; cursor: pointer; transition: background 0.18s, border-color 0.18s; }
+.add-btn:hover { border-color: var(--blue); background: #eef4ff; }
+.tip { margin-top: 8px; color: #96a0b0; font-size: 11px; text-align: center; }
+.submit-panel { padding: 22px; border-radius: 20px; color: #fff; background: linear-gradient(135deg, #132f5a, #244f96); box-shadow: 0 14px 34px rgba(24, 64, 124, 0.18); }
+.submit-copy { margin-bottom: 16px; }
+.submit-copy strong { display: block; margin-bottom: 4px; font-size: 16px; }
+.submit-copy span { color: rgba(255,255,255,0.68); font-size: 12px; }
+.generate-btn { width: 100%; padding: 14px 18px; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; color: #19355f; background: linear-gradient(180deg, #ffffff, #eef4ff); box-shadow: 0 8px 20px rgba(4,18,43,0.20); font-size: 16px; font-weight: 750; cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
+.generate-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(4,18,43,0.26); }
 .generate-btn:active { transform: translateY(0); }
-.generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-.pdf-actions { display: none; margin-top: 12px; padding: 14px; border: 1px solid #dbe4ff; border-radius: 10px; background: #f7f9ff; text-align: center; }
-.pdf-actions p { margin-bottom: 10px; color: #3852a4; font-size: 13px; }
-.pdf-action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #27ae60; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
-.pdf-action-btn.secondary { margin-top: 8px; background: #fff; color: #4a6cf7; border: 1px solid #4a6cf7; }
-.tip { font-size: 11px; color: #aaa; margin-top: 4px; }
-.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.toast.error { background: #e74c3c; }
-.plate-color-group { display: flex; gap: 8px; flex-wrap: wrap; }
-.plate-color-btn { padding: 6px 14px; border-radius: 6px; border: 2px solid #ddd; font-size: 13px; cursor: pointer; transition: all 0.2s; background: #fff; }
-.plate-color-btn.active { border-color: #4a6cf7; background: #f0f3ff; color: #4a6cf7; font-weight: 600; }
+.generate-btn:disabled { opacity: 0.58; cursor: not-allowed; transform: none; }
+.pdf-actions { display: none; margin-top: 14px; padding: 15px; border: 1px solid rgba(143,227,195,0.32); border-radius: 13px; background: rgba(255,255,255,0.10); }
+.pdf-actions p { margin-bottom: 11px; color: #d9f8eb; font-size: 13px; line-height: 1.5; text-align: center; }
+.pdf-action-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; color: #fff; background: var(--green); font-size: 15px; font-weight: 700; cursor: pointer; }
+.pdf-action-btn.secondary { margin-top: 8px; border: 1px solid rgba(255,255,255,0.35); color: #fff; background: transparent; }
+.privacy-note { display: flex; justify-content: center; align-items: center; gap: 7px; margin-top: 14px; color: #8792a3; font-size: 11px; text-align: center; }
+.privacy-note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #41a47e; box-shadow: 0 0 0 3px rgba(65,164,126,0.11); }
+.toast { position: fixed; top: max(18px, env(safe-area-inset-top)); left: 50%; z-index: 9999; display: none; width: max-content; max-width: calc(100vw - 32px); padding: 11px 18px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; color: #fff; background: rgba(20,126,89,0.96); box-shadow: 0 12px 30px rgba(22,54,89,0.2); font-size: 13px; text-align: center; backdrop-filter: blur(10px); }
+.toast.error { background: rgba(190,65,69,0.96); }
+.plate-color-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.plate-color-btn { min-height: 34px; padding: 6px 12px; border: 1px solid #dce4ef; border-radius: 9px; color: #526077; background: #fff; font-size: 12px; cursor: pointer; transition: all 0.18s; }
+.plate-color-btn.active { border-color: var(--blue); color: var(--blue-dark); background: #edf4ff; box-shadow: 0 0 0 3px rgba(47,103,199,0.08); font-weight: 650; }
 .plate-color-btn[data-color="yellow"] { border-color: #f0c040; }
 .plate-color-btn[data-color="yellow"].active { background: #fffbe6; color: #b8860b; border-color: #f0c040; }
 .plate-color-btn[data-color="blue"] { border-color: #4a90d9; }
@@ -54,17 +79,46 @@ h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
 .plate-color-btn[data-color="black"] { border-color: #555; }
 .plate-color-btn[data-color="black"].active { background: #f0f0f0; color: #111; border-color: #333; }
 .pdf-render-root { width: 680px; min-width: 680px; max-width: 680px; box-sizing: border-box; font-family: "Songti SC", STSong, SimSun, serif; font-size: 14px; color: #000; background: #fff; -webkit-text-size-adjust: none; text-size-adjust: none; }
+@media (max-width: 520px) {
+  body { padding: 12px 12px 28px; }
+  .hero { padding: 22px 18px; border-radius: 20px; }
+  .brand-line { margin-bottom: 20px; }
+  .eyebrow { font-size: 10px; }
+  .hero-meta { gap: 8px 14px; margin-top: 16px; }
+  .card { padding: 18px 16px; border-radius: 17px; }
+  .card-title { margin-bottom: 18px; }
+  .submit-panel { padding: 18px 16px; border-radius: 17px; }
+  .plate-color-btn { flex: 1 1 calc(33.333% - 8px); padding-left: 7px; padding-right: 7px; }
+}
+@media (max-width: 360px) {
+  .form-row { display: block; }
+  .hero-meta { display: grid; grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>📋 被保险人声明书生成器</h1>
-  <p class="subtitle">信联融担 · 车险分期业务</p>
+  <header class="hero">
+    <div class="brand-line">
+      <div class="brand"><span class="brand-mark">信</span><span>信联融担</span></div>
+      <span class="eyebrow">车险分期 · 在线工具</span>
+    </div>
+    <h1>被保险人声明书</h1>
+    <p class="subtitle">填写业务信息与车辆资料，快速生成格式统一、可直接分享的 PDF 声明书。</p>
+    <div class="hero-meta">
+      <span><i></i>手机与电脑通用</span>
+      <span><i></i>本地生成 PDF</span>
+      <span><i></i>支持多车辆</span>
+    </div>
+  </header>
 
   <!-- 基本信息 -->
-  <div class="card">
-    <div class="card-title">📝 基本信息</div>
+  <section class="card">
+    <div class="card-title">
+      <span class="step-badge">01</span>
+      <div><strong>基本信息</strong><small>用于生成声明书正文与文件名称</small></div>
+    </div>
     <div class="form-group">
       <label>借款人（开户人/办理主体）<span class="req">*</span></label>
       <input type="text" id="borrower" placeholder="如：XX物流有限公司">
@@ -83,23 +137,30 @@ h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
         <input type="number" id="rate" placeholder="如：5.50" step="0.01" min="0">
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- 车辆列表 -->
-  <div class="card">
-    <div class="card-title">🚗 车辆列表</div>
+  <section class="card">
+    <div class="card-title">
+      <span class="step-badge">02</span>
+      <div><strong>车辆信息</strong><small>支持车牌号或车架号，可添加多辆车</small></div>
+    </div>
     <div id="vehicleList"></div>
-    <button class="add-btn" onclick="addVehicle()">＋ 添加车辆</button>
+    <button type="button" class="add-btn" onclick="addVehicle()">＋ 添加一辆车</button>
     <p class="tip">支持车牌号或车架号，至少添加1辆</p>
-  </div>
+  </section>
 
   <!-- 生成按钮 -->
-  <button class="generate-btn" onclick="generatePDF()">生成声明书 PDF</button>
-  <div class="pdf-actions" id="pdfActions">
-    <p>PDF 已生成，请点击下方按钮分享或存储到“文件”。</p>
-    <button class="pdf-action-btn" onclick="shareGeneratedPDF()">分享 / 保存 PDF</button>
-    <button class="pdf-action-btn secondary" onclick="downloadGeneratedPDF()">直接下载 PDF</button>
-  </div>
+  <section class="submit-panel">
+    <div class="submit-copy"><strong>生成并确认文件</strong><span>生成后可直接分享、下载或存储到“文件”</span></div>
+    <button type="button" class="generate-btn" onclick="generatePDF()">生成声明书 PDF</button>
+    <div class="pdf-actions" id="pdfActions">
+      <p id="generatedFileHint">PDF 已生成，请选择分享或下载。</p>
+      <button type="button" class="pdf-action-btn" onclick="shareGeneratedPDF()">分享 / 保存 PDF</button>
+      <button type="button" class="pdf-action-btn secondary" onclick="downloadGeneratedPDF()">直接下载 PDF</button>
+    </div>
+  </section>
+  <p class="privacy-note">填写内容仅用于在当前设备生成文件</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -109,6 +170,7 @@ let vehicleCount = 0;
 let generatedPdfBlob = null;
 let generatedPdfFile = null;
 let generatedPdfFileName = '';
+let generatedFormSignature = '';
 
 const colorMap = {
   yellow: '黄色',
@@ -121,16 +183,15 @@ const colorMap = {
 };
 
 function addVehicle() {
+  invalidateGeneratedPDF();
   vehicleCount++;
   const id = vehicleCount;
   const div = document.createElement('div');
   div.className = 'vehicle-item';
   div.id = 'vehicle-' + id;
   div.innerHTML = `
-    <button class="remove-btn" onclick="removeVehicle(${id})">×</button>
-    <div style="display:flex;align-items:center;margin-bottom:8px;">
-      <span style="font-size:13px;color:#888;margin-right:8px;">#${id}</span>
-    </div>
+    <button type="button" class="remove-btn" aria-label="删除这辆车" onclick="removeVehicle(${id})">×</button>
+    <div class="vehicle-head"><span class="vehicle-index">#${id}</span><span>车辆资料</span></div>
     <div class="form-group" style="margin-bottom:10px;">
       <label>车牌号 / 车架号<span class="req">*</span></label>
       <input type="text" class="v-plate" placeholder="如：鲁A12345 或 LVSHFFAL2GN123456">
@@ -138,13 +199,13 @@ function addVehicle() {
     <div class="form-group" style="margin-bottom:0;">
       <label>车牌颜色<span class="req">*</span></label>
       <div class="plate-color-group">
-        <button class="plate-color-btn" data-color="yellow" onclick="selectColor(this)">🟡 黄色</button>
-        <button class="plate-color-btn" data-color="blue" onclick="selectColor(this)">🔵 蓝色</button>
-        <button class="plate-color-btn" data-color="gradient-green" onclick="selectColor(this)">🟩 渐变绿色</button>
-        <button class="plate-color-btn" data-color="yellow-green" onclick="selectColor(this)">🟨 黄绿双拼</button>
-        <button class="plate-color-btn" data-color="green" onclick="selectColor(this)">🟢 绿色</button>
-        <button class="plate-color-btn" data-color="white" onclick="selectColor(this)">⚪ 白色</button>
-        <button class="plate-color-btn" data-color="black" onclick="selectColor(this)">⚫ 黑色</button>
+        <button type="button" class="plate-color-btn" data-color="yellow" onclick="selectColor(this)">🟡 黄色</button>
+        <button type="button" class="plate-color-btn" data-color="blue" onclick="selectColor(this)">🔵 蓝色</button>
+        <button type="button" class="plate-color-btn" data-color="gradient-green" onclick="selectColor(this)">🟩 渐变绿色</button>
+        <button type="button" class="plate-color-btn" data-color="yellow-green" onclick="selectColor(this)">🟨 黄绿双拼</button>
+        <button type="button" class="plate-color-btn" data-color="green" onclick="selectColor(this)">🟢 绿色</button>
+        <button type="button" class="plate-color-btn" data-color="white" onclick="selectColor(this)">⚪ 白色</button>
+        <button type="button" class="plate-color-btn" data-color="black" onclick="selectColor(this)">⚫ 黑色</button>
       </div>
     </div>
   `;
@@ -152,16 +213,18 @@ function addVehicle() {
 }
 
 function removeVehicle(id) {
+  invalidateGeneratedPDF();
   const el = document.getElementById('vehicle-' + id);
   if (el) el.remove();
   // 重新编号
   const items = document.querySelectorAll('.vehicle-item');
   items.forEach((item, i) => {
-    item.querySelector('span').textContent = '#' + (i + 1);
+    item.querySelector('.vehicle-index').textContent = '#' + (i + 1);
   });
 }
 
 function selectColor(btn) {
+  invalidateGeneratedPDF();
   const group = btn.parentElement;
   group.querySelectorAll('.plate-color-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -180,17 +243,67 @@ function isIOSDevice() {
          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
-function storeGeneratedPDF(blob, fileName) {
+function invalidateGeneratedPDF() {
+  generatedPdfBlob = null;
+  generatedPdfFile = null;
+  generatedPdfFileName = '';
+  generatedFormSignature = '';
+  const actions = document.getElementById('pdfActions');
+  if (actions) actions.style.display = 'none';
+}
+
+function sanitizeFileNamePart(value) {
+  const normalized = value.normalize('NFKC').replace(/[\u0000-\u001f\u007f/\\?%*:|"<>]/g, '-');
+  return normalized.replace(/\s+/g, ' ').replace(/[.\s]+$/g, '').trim().slice(0, 60) || '未命名被保险人';
+}
+
+function getLocalDateString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function buildPdfFileName(insured) {
+  return `被保险人声明书_${sanitizeFileNamePart(insured)}_${getLocalDateString()}.pdf`;
+}
+
+function getCurrentFormSignature() {
+  const vehicles = Array.from(document.querySelectorAll('.vehicle-item')).map(item => ({
+    plate: item.querySelector('.v-plate').value.trim(),
+    color: item.querySelector('.plate-color-btn.active')?.dataset.color || ''
+  }));
+  return JSON.stringify({
+    borrower: document.getElementById('borrower').value.trim(),
+    insured: document.getElementById('insured').value.trim(),
+    periods: document.getElementById('periods').value.trim(),
+    rate: document.getElementById('rate').value.trim(),
+    vehicles
+  });
+}
+
+function ensureGeneratedPDFIsCurrent() {
+  if (!generatedPdfBlob || !generatedPdfFile) {
+    showToast('请先生成 PDF', true);
+    return false;
+  }
+  if (generatedFormSignature !== getCurrentFormSignature()) {
+    invalidateGeneratedPDF();
+    showToast('信息已修改，请重新生成 PDF', true);
+    return false;
+  }
+  return true;
+}
+
+function storeGeneratedPDF(blob, fileName, formSignature) {
   generatedPdfBlob = blob;
   generatedPdfFileName = fileName;
   generatedPdfFile = new File([blob], fileName, { type: 'application/pdf' });
+  generatedFormSignature = formSignature;
 }
 
 function downloadGeneratedPDF() {
-  if (!generatedPdfBlob) {
-    showToast('请先生成 PDF', true);
-    return;
-  }
+  if (!ensureGeneratedPDFIsCurrent()) return;
 
   const url = URL.createObjectURL(generatedPdfBlob);
   const a = document.createElement('a');
@@ -204,10 +317,7 @@ function downloadGeneratedPDF() {
 }
 
 async function shareGeneratedPDF() {
-  if (!generatedPdfFile) {
-    showToast('请先生成 PDF', true);
-    return;
-  }
+  if (!ensureGeneratedPDFIsCurrent()) return;
 
   const shareData = { files: [generatedPdfFile] };
   try {
@@ -226,7 +336,7 @@ async function shareGeneratedPDF() {
 }
 
 function generatePDF() {
-  document.getElementById('pdfActions').style.display = 'none';
+  invalidateGeneratedPDF();
   const borrower = document.getElementById('borrower').value.trim();
   const insured = document.getElementById('insured').value.trim();
   const periods = document.getElementById('periods').value.trim();
@@ -248,9 +358,13 @@ function generatePDF() {
     if (!colorBtn) { showToast('请选择所有车辆的车牌颜色', true); return; }
     vehicles.push({
       plate: plate,
+      colorKey: colorBtn.dataset.color,
       color: colorMap[colorBtn.dataset.color]
     });
   }
+
+  const formSignature = JSON.stringify({ borrower, insured, periods, rate, vehicles: vehicles.map(v => ({ plate: v.plate, color: v.colorKey })) });
+  const fileName = buildPdfFileName(insured);
 
   // 使用 jsPDF 生成 PDF
   const { jsPDF } = window.jspdf;
@@ -268,16 +382,22 @@ function generatePDF() {
   // 设置中文字体 - 使用内置字体，中文需要特殊处理
   // jsPDF 默认不支持中文，我们用 SVG 转 canvas 方式或使用 html2canvas
   // 更好的方案：直接用 html2canvas
-  generateFromHTML(borrower, insured, periods, rate, vehicles);
+  generateFromHTML(borrower, insured, periods, rate, vehicles, fileName, formSignature);
 }
 
-function generateFromHTML(borrower, insured, periods, rate, vehicles) {
+function escapeHTML(value) {
+  return value.replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+}
+
+function generateFromHTML(borrower, insured, periods, rate, vehicles, fileName, formSignature) {
   const vehicleRows = vehicles.map((v, i) => 
-    `<tr><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${i+1}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${v.plate}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${v.color}</td></tr>`
+    `<tr><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${i+1}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${escapeHTML(v.plate)}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${escapeHTML(v.color)}</td></tr>`
   ).join('');
 
   const rateDisplay = rate.includes('%') ? rate : rate + '%';
   const today = `${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate()}日`;
+  const safeBorrower = escapeHTML(borrower);
+  const safeInsured = escapeHTML(insured);
 
   // 第一页：正文
   const page1HTML = `
@@ -285,9 +405,9 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       <h2 style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:10px;">保单被保险人声明书</h2>
       <p style="margin-bottom:4px;">致：山高聚行（北京）科技有限公司山东分公司</p>
       <p style="text-indent:2em;margin-bottom:4px;">本公司作为车牌号（或车架号）为<u>附件1《车辆列表》内</u>的车辆（下称"该车辆"）之实际权利人，现就该车辆的商业险分期事宜作出如下声明与承诺：</p>
-      <p style="text-indent:2em;margin-bottom:4px;">一、本公司作为车辆的实际权利人，同意并认可该车辆以<b>${borrower}</b>名义作为办理主体，在贵司办理该车辆保险分期业务、签订相关合同等文件，即本公司同意该车辆的投保人为<b>山高聚行（北京）科技有限公司山东分公司</b>，被保险人为<b>${insured}</b>，且本公司无条件认可并接受投保人与办理主体之间签订的相关合同等文件之全部内容并愿意承担车辆权利人应承担的合同义务和责任。</p>
-      <p style="text-indent:2em;margin-bottom:4px;">二、本公司在此不可撤销地授权贵司作为该车辆的投保人办理商业险购买及相关手续。本公司承诺按照贵司与<b>${borrower}</b>签订的相关合同等文件所约定的分期方式支付保险分期费用。</p>
-      <p style="text-indent:2em;margin-bottom:4px;">三、本公司确认已知悉并同意保险分期业务的费率结构（服务费率${rateDisplay}、分期周期${periods}期），并承诺按照投保人与办理主体签署的分期协议约定，对系统中显示的被保险人为<b>${insured}</b>的全部未清偿的保险分期款项承担连带清偿责任，责任范围包括商业险保费、手续费及其他一切合理追偿费用。</p>
+      <p style="text-indent:2em;margin-bottom:4px;">一、本公司作为车辆的实际权利人，同意并认可该车辆以<b>${safeBorrower}</b>名义作为办理主体，在贵司办理该车辆保险分期业务、签订相关合同等文件，即本公司同意该车辆的投保人为<b>山高聚行（北京）科技有限公司山东分公司</b>，被保险人为<b>${safeInsured}</b>，且本公司无条件认可并接受投保人与办理主体之间签订的相关合同等文件之全部内容并愿意承担车辆权利人应承担的合同义务和责任。</p>
+      <p style="text-indent:2em;margin-bottom:4px;">二、本公司在此不可撤销地授权贵司作为该车辆的投保人办理商业险购买及相关手续。本公司承诺按照贵司与<b>${safeBorrower}</b>签订的相关合同等文件所约定的分期方式支付保险分期费用。</p>
+      <p style="text-indent:2em;margin-bottom:4px;">三、本公司确认已知悉并同意保险分期业务的费率结构（服务费率${escapeHTML(rateDisplay)}、分期周期${escapeHTML(periods)}期），并承诺按照投保人与办理主体签署的分期协议约定，对系统中显示的被保险人为<b>${safeInsured}</b>的全部未清偿的保险分期款项承担连带清偿责任，责任范围包括商业险保费、手续费及其他一切合理追偿费用。</p>
       <p style="text-indent:2em;margin-bottom:4px;">四、本公司在此不可撤销地同意由投保人即<b>山高聚行（北京）科技有限公司山东分公司</b>在合同约定或法律规定的退保条件成就时直接发起退保，投保人发起退保时，出具本声明书的电子版影印件即视为我司已书面同意由投保人发起退保，我司不再主张被保险人在保单退保过程中的所有权益，所有退保权益均由投保人主张。退保车辆名单明细以<b>山高聚行（北京）科技有限公司山东分公司</b>提供为准。本公司已了解退保所带来的后果，并愿意承担本承诺所带来的结果及相关责任。</p>
       <p style="text-indent:2em;margin-bottom:4px;">五、本公司知悉并了解中国相关法律规定,本公司上述声明内容全部系自愿做出的真实意思表示，不存在欺诈、胁迫、重大误解等情形，真实有效。</p>
       <p style="text-align:center;margin:10px 0 14px;font-weight:bold;">特此声明。</p>
@@ -372,14 +492,19 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       // 附件（新页开始）
       addCanvasPages(pdf, canvas2, true);
 
-      const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
       pdf.setProperties({
         title: fileName,
         subject: '保单被保险人声明书',
         creator: '被保险人声明书生成器'
       });
       const blob = pdf.output('blob');
-      storeGeneratedPDF(blob, fileName);
+      if (formSignature !== getCurrentFormSignature()) {
+        invalidateGeneratedPDF();
+        showToast('信息已修改，请重新生成 PDF', true);
+        return;
+      }
+      storeGeneratedPDF(blob, fileName, formSignature);
+      document.getElementById('generatedFileHint').textContent = `已生成：${fileName}`;
 
       if (isIOSDevice()) {
         // iOS 分享临时 blob: 链接时会产生无后缀书签文件；改为由用户分享真正的 File 对象。
@@ -401,6 +526,7 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
 
 // 初始添加一辆车
 addVehicle();
+document.querySelector('.container').addEventListener('input', invalidateGeneratedPDF);
 </script>
 </body>
 </html>
