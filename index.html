@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>被保险人声明书生成器</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f5f7fa; min-height: 100vh; padding: 16px; }
+.container { max-width: 600px; margin: 0 auto; }
+h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
+.subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 20px; }
+.card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-title { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
+.form-group label .req { color: #e74c3c; margin-left: 2px; }
+.form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; background: #fafbfc; }
+.form-group input:focus, .form-group select:focus { border-color: #4a6cf7; background: #fff; }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+.vehicle-item { background: #f8f9fc; border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
+.vehicle-item .remove-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: #fee; border: none; color: #e74c3c; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.vehicle-item .remove-btn:hover { background: #e74c3c; color: #fff; }
+.add-btn { width: 100%; padding: 10px; border: 2px dashed #4a6cf7; border-radius: 8px; background: transparent; color: #4a6cf7; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.add-btn:hover { background: #f0f3ff; }
+.generate-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, #4a6cf7, #6c5ce7); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.generate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74,108,247,0.4); }
+.generate-btn:active { transform: translateY(0); }
+.generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.tip { font-size: 11px; color: #aaa; margin-top: 4px; }
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.toast.error { background: #e74c3c; }
+.plate-color-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.plate-color-btn { padding: 6px 14px; border-radius: 6px; border: 2px solid #ddd; font-size: 13px; cursor: pointer; transition: all 0.2s; background: #fff; }
+.plate-color-btn.active { border-color: #4a6cf7; background: #f0f3ff; color: #4a6cf7; font-weight: 600; }
+.plate-color-btn[data-color="yellow"] { border-color: #f0c040; }
+.plate-color-btn[data-color="yellow"].active { background: #fffbe6; color: #b8860b; border-color: #f0c040; }
+.plate-color-btn[data-color="blue"] { border-color: #4a90d9; }
+.plate-color-btn[data-color="blue"].active { background: #e8f0fe; color: #2563eb; border-color: #4a90d9; }
+.plate-color-btn[data-color="gradient-green"] { border-color: #43a047; }
+.plate-color-btn[data-color="gradient-green"].active { background: #e8f5e9; color: #2e7d32; border-color: #43a047; }
+.plate-color-btn[data-color="yellow-green"] { border-color: #c0a030; }
+.plate-color-btn[data-color="yellow-green"].active { background: #f9f5e0; color: #8d6e12; border-color: #c0a030; }
+.plate-color-btn[data-color="green"] { border-color: #4caf50; }
+.plate-color-btn[data-color="green"].active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
+.plate-color-btn[data-color="white"] { border-color: #bbb; }
+.plate-color-btn[data-color="white"].active { background: #f5f5f5; color: #333; border-color: #999; }
+.plate-color-btn[data-color="black"] { border-color: #555; }
+.plate-color-btn[data-color="black"].active { background: #f0f0f0; color: #111; border-color: #333; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📋 被保险人声明书生成器</h1>
+  <p class="subtitle">信联融担 · 车险分期业务</p>
+
+  <!-- 基本信息 -->
+  <div class="card">
+    <div class="card-title">📝 基本信息</div>
+    <div class="form-group">
+      <label>借款人（开户人/办理主体）<span class="req">*</span></label>
+      <input type="text" id="borrower" placeholder="如：XX物流有限公司">
+    </div>
+    <div class="form-group">
+      <label>被保险人<span class="req">*</span></label>
+      <input type="text" id="insured" placeholder="如：XX运输有限公司">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>分期期数<span class="req">*</span></label>
+        <input type="number" id="periods" value="9" min="1" max="12">
+      </div>
+      <div class="form-group">
+        <label>服务费率（%）<span class="req">*</span></label>
+        <input type="number" id="rate" placeholder="如：5.50" step="0.01" min="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- 车辆列表 -->
+  <div class="card">
+    <div class="card-title">🚗 车辆列表</div>
+    <div id="vehicleList"></div>
+    <button class="add-btn" onclick="addVehicle()">＋ 添加车辆</button>
+    <p class="tip">支持车牌号或车架号，至少添加1辆</p>
+  </div>
+
+  <!-- 生成按钮 -->
+  <button class="generate-btn" onclick="generatePDF()">生成声明书 PDF</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let vehicleCount = 0;
+
+const colorMap = {
+  yellow: '黄色',
+  blue: '蓝色',
+  'gradient-green': '渐变绿色',
+  'yellow-green': '黄绿双拼',
+  green: '绿色',
+  white: '白色',
+  black: '黑色'
+};
+
+function addVehicle() {
+  vehicleCount++;
+  const id = vehicleCount;
+  const div = document.createElement('div');
+  div.className = 'vehicle-item';
+  div.id = 'vehicle-' + id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeVehicle(${id})">×</button>
+    <div style="display:flex;align-items:center;margin-bottom:8px;">
+      <span style="font-size:13px;color:#888;margin-right:8px;">#${id}</span>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label>车牌号 / 车架号<span class="req">*</span></label>
+      <input type="text" class="v-plate" placeholder="如：鲁A12345 或 LVSHFFAL2GN123456">
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label>车牌颜色<span class="req">*</span></label>
+      <div class="plate-color-group">
+        <button class="plate-color-btn" data-color="yellow" onclick="selectColor(this)">🟡 黄色</button>
+        <button class="plate-color-btn" data-color="blue" onclick="selectColor(this)">🔵 蓝色</button>
+        <button class="plate-color-btn" data-color="gradient-green" onclick="selectColor(this)">🟩 渐变绿色</button>
+        <button class="plate-color-btn" data-color="yellow-green" onclick="selectColor(this)">🟨 黄绿双拼</button>
+        <button class="plate-color-btn" data-color="green" onclick="selectColor(this)">🟢 绿色</button>
+        <button class="plate-color-btn" data-color="white" onclick="selectColor(this)">⚪ 白色</button>
+        <button class="plate-color-btn" data-color="black" onclick="selectColor(this)">⚫ 黑色</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('vehicleList').appendChild(div);
+}
+
+function removeVehicle(id) {
+  const el = document.getElementById('vehicle-' + id);
+  if (el) el.remove();
+  // 重新编号
+  const items = document.querySelectorAll('.vehicle-item');
+  items.forEach((item, i) => {
+    item.querySelector('span').textContent = '#' + (i + 1);
+  });
+}
+
+function selectColor(btn) {
+  const group = btn.parentElement;
+  group.querySelectorAll('.plate-color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+function generatePDF() {
+  const borrower = document.getElementById('borrower').value.trim();
+  const insured = document.getElementById('insured').value.trim();
+  const periods = document.getElementById('periods').value.trim();
+  const rate = document.getElementById('rate').value.trim();
+
+  if (!borrower) { showToast('请填写借款人', true); return; }
+  if (!insured) { showToast('请填写被保险人', true); return; }
+  if (!periods) { showToast('请填写分期期数', true); return; }
+  if (!rate) { showToast('请填写服务费率', true); return; }
+
+  const vehicleItems = document.querySelectorAll('.vehicle-item');
+  if (vehicleItems.length === 0) { showToast('请至少添加1辆车辆', true); return; }
+
+  const vehicles = [];
+  for (const item of vehicleItems) {
+    const plate = item.querySelector('.v-plate').value.trim();
+    const colorBtn = item.querySelector('.plate-color-btn.active');
+    if (!plate) { showToast('请填写所有车辆的车牌号/车架号', true); return; }
+    if (!colorBtn) { showToast('请选择所有车辆的车牌颜色', true); return; }
+    vehicles.push({
+      plate: plate,
+      color: colorMap[colorBtn.dataset.color]
+    });
+  }
+
+  // 使用 jsPDF 生成 PDF
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+
+  // 页面设置
+  const pageW = 210;
+  const marginLeft = 25;
+  const marginRight = 25;
+  const contentW = pageW - marginLeft - marginRight;
+  let y = 25;
+  const lineHeight = 7;
+  const fontSize = 12;
+
+  // 设置中文字体 - 使用内置字体，中文需要特殊处理
+  // jsPDF 默认不支持中文，我们用 SVG 转 canvas 方式或使用 html2canvas
+  // 更好的方案：直接用 html2canvas
+  generateFromHTML(borrower, insured, periods, rate, vehicles);
+}
+
+function generateFromHTML(borrower, insured, periods, rate, vehicles) {
+  // 构建隐藏的 HTML 用于渲染
+  const vehicleRows = vehicles.map((v, i) => 
+    `<tr><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${i+1}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${v.plate}</td><td style="border:1px solid #333;text-align:center;padding:4px 8px;">${v.color}</td></tr>`
+  ).join('');
+
+  const rateDisplay = rate.includes('%') ? rate : rate + '%';
+
+  const htmlContent = `
+    <div style="width:680px;padding:40px 50px;font-family:SimSun,serif;font-size:14px;line-height:2;color:#000;background:#fff;">
+      <h2 style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:20px;">保单被保险人声明书</h2>
+      
+      <p style="margin-bottom:10px;">致：山高聚行（北京）科技有限公司山东分公司</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">本公司作为车牌号（或车架号）为<u>附件1《车辆列表》内</u>的车辆（下称"该车辆"）之实际权利人，现就该车辆的商业险分期事宜作出如下声明与承诺：</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">一、本公司作为车辆的实际权利人，同意并认可该车辆以<b>${borrower}</b>名义作为办理主体，在贵司办理该车辆保险分期业务、签订相关合同等文件，即本公司同意该车辆的投保人为<b>山高聚行（北京）科技有限公司山东分公司</b>，被保险人为<b>${insured}</b>，且本公司无条件认可并接受投保人与办理主体之间签订的相关合同等文件之全部内容并愿意承担车辆权利人应承担的合同义务和责任。</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">二、本公司在此不可撤销地授权贵司作为该车辆的投保人办理商业险购买及相关手续。本公司承诺按照贵司与<b>${borrower}</b>签订的相关合同等文件所约定的分期方式支付保险分期费用。</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">三、本公司确认已知悉并同意保险分期业务的费率结构（服务费率${rateDisplay}、分期周期${periods}期），并承诺按照投保人与办理主体签署的分期协议约定，对系统中显示的被保险人为<b>${insured}</b>的全部未清偿的保险分期款项承担连带清偿责任，责任范围包括商业险保费、手续费及其他一切合理追偿费用。</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">四、本公司在此不可撤销地同意由投保人即<b>山高聚行（北京）科技有限公司山东分公司</b>在合同约定或法律规定的退保条件成就时直接发起退保，投保人发起退保时，出具本声明书的电子版影印件即视为我司已书面同意由投保人发起退保，我司不再主张被保险人在保单退保过程中的所有权益，所有退保权益均由投保人主张。退保车辆名单明细以<b>山高聚行（北京）科技有限公司山东分公司</b>提供为准。本公司已了解退保所带来的后果，并愿意承担本承诺所带来的结果及相关责任。</p>
+      
+      <p style="text-indent:2em;margin-bottom:10px;">五、本公司知悉并了解中国相关法律规定,本公司上述声明内容全部系自愿做出的真实意思表示，不存在欺诈、胁迫、重大误解等情形，真实有效。</p>
+      
+      <p style="text-align:center;margin:20px 0 30px;font-weight:bold;">特此声明。</p>
+      
+      <p style="margin-bottom:40px;text-align:right;">声明人（签字/盖章）：</p>
+      
+      <p style="text-align:right;">日期：${new Date().getFullYear()}年${new Date().getMonth()+1}月${new Date().getDate()}日</p>
+      
+      <div style="margin-top:40px;">
+        <p style="font-weight:bold;margin-bottom:10px;">附件1 车辆列表</p>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f5f5f5;">
+              <th style="border:1px solid #333;padding:6px 10px;width:60px;">序号</th>
+              <th style="border:1px solid #333;padding:6px 10px;">车牌号/发动机号/车架号</th>
+              <th style="border:1px solid #333;padding:6px 10px;width:80px;">车牌颜色</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${vehicleRows}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // 创建隐藏容器渲染 HTML
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;';
+  container.innerHTML = htmlContent;
+  document.body.appendChild(container);
+
+  // 使用 html2canvas
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  script.onload = function() {
+    html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      document.body.removeChild(container);
+      
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdfW = 210;
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      
+      // 如果内容超过一页，分页处理
+      const pageH = 297;
+      let position = 0;
+      let remainH = pdfH;
+      
+      if (pdfH <= pageH) {
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      } else {
+        // 多页处理
+        while (remainH > 0) {
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfW, pdfH);
+          remainH -= pageH;
+          if (remainH > 0) {
+            position -= pageH;
+            pdf.addPage();
+          }
+        }
+      }
+      
+      const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
+      pdf.save(fileName);
+      showToast('✅ PDF已生成并开始下载');
+    }).catch(err => {
+      document.body.removeChild(container);
+      showToast('生成失败：' + err.message, true);
+      console.error(err);
+    });
+  };
+  document.head.appendChild(script);
+}
+
+// 初始添加一辆车
+addVehicle();
+</script>
+</body>
+</html>
