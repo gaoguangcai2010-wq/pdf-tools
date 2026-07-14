@@ -29,6 +29,10 @@ h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
 .generate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74,108,247,0.4); }
 .generate-btn:active { transform: translateY(0); }
 .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.pdf-actions { display: none; margin-top: 12px; padding: 14px; border: 1px solid #dbe4ff; border-radius: 10px; background: #f7f9ff; text-align: center; }
+.pdf-actions p { margin-bottom: 10px; color: #3852a4; font-size: 13px; }
+.pdf-action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #27ae60; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.pdf-action-btn.secondary { margin-top: 8px; background: #fff; color: #4a6cf7; border: 1px solid #4a6cf7; }
 .tip { font-size: 11px; color: #aaa; margin-top: 4px; }
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .toast.error { background: #e74c3c; }
@@ -49,6 +53,7 @@ h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
 .plate-color-btn[data-color="white"].active { background: #f5f5f5; color: #333; border-color: #999; }
 .plate-color-btn[data-color="black"] { border-color: #555; }
 .plate-color-btn[data-color="black"].active { background: #f0f0f0; color: #111; border-color: #333; }
+.pdf-render-root { width: 680px; min-width: 680px; max-width: 680px; box-sizing: border-box; font-family: "Songti SC", STSong, SimSun, serif; font-size: 14px; color: #000; background: #fff; -webkit-text-size-adjust: none; text-size-adjust: none; }
 </style>
 </head>
 <body>
@@ -90,12 +95,20 @@ h1 { text-align: center; font-size: 20px; color: #1a1a2e; margin-bottom: 4px; }
 
   <!-- 生成按钮 -->
   <button class="generate-btn" onclick="generatePDF()">生成声明书 PDF</button>
+  <div class="pdf-actions" id="pdfActions">
+    <p>PDF 已生成，请点击下方按钮分享或存储到“文件”。</p>
+    <button class="pdf-action-btn" onclick="shareGeneratedPDF()">分享 / 保存 PDF</button>
+    <button class="pdf-action-btn secondary" onclick="downloadGeneratedPDF()">直接下载 PDF</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 let vehicleCount = 0;
+let generatedPdfBlob = null;
+let generatedPdfFile = null;
+let generatedPdfFileName = '';
 
 const colorMap = {
   yellow: '黄色',
@@ -162,7 +175,58 @@ function showToast(msg, isError) {
   setTimeout(() => { t.style.display = 'none'; }, 2500);
 }
 
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function storeGeneratedPDF(blob, fileName) {
+  generatedPdfBlob = blob;
+  generatedPdfFileName = fileName;
+  generatedPdfFile = new File([blob], fileName, { type: 'application/pdf' });
+}
+
+function downloadGeneratedPDF() {
+  if (!generatedPdfBlob) {
+    showToast('请先生成 PDF', true);
+    return;
+  }
+
+  const url = URL.createObjectURL(generatedPdfBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = generatedPdfFileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('✅ PDF 已开始下载');
+}
+
+async function shareGeneratedPDF() {
+  if (!generatedPdfFile) {
+    showToast('请先生成 PDF', true);
+    return;
+  }
+
+  const shareData = { files: [generatedPdfFile] };
+  try {
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+      await navigator.share(shareData);
+      showToast('✅ PDF 已分享');
+    } else {
+      downloadGeneratedPDF();
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      showToast('分享失败，请使用“直接下载 PDF”', true);
+      console.error(err);
+    }
+  }
+}
+
 function generatePDF() {
+  document.getElementById('pdfActions').style.display = 'none';
   const borrower = document.getElementById('borrower').value.trim();
   const insured = document.getElementById('insured').value.trim();
   const periods = document.getElementById('periods').value.trim();
@@ -217,7 +281,7 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
 
   // 第一页：正文
   const page1HTML = `
-    <div style="width:680px;padding:25px 50px 15px;font-family:SimSun,serif;font-size:14px;line-height:1.6;color:#000;background:#fff;">
+    <div class="pdf-render-root" style="padding:25px 50px 15px;line-height:1.6;">
       <h2 style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:10px;">保单被保险人声明书</h2>
       <p style="margin-bottom:4px;">致：山高聚行（北京）科技有限公司山东分公司</p>
       <p style="text-indent:2em;margin-bottom:4px;">本公司作为车牌号（或车架号）为<u>附件1《车辆列表》内</u>的车辆（下称"该车辆"）之实际权利人，现就该车辆的商业险分期事宜作出如下声明与承诺：</p>
@@ -234,7 +298,7 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
 
   // 第二页：附件
   const page2HTML = `
-    <div style="width:680px;padding:40px 50px;font-family:SimSun,serif;font-size:14px;line-height:2;color:#000;background:#fff;">
+    <div class="pdf-render-root" style="padding:40px 50px;line-height:2;">
       <p style="font-weight:bold;margin-bottom:20px;">附件1 车辆列表</p>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
@@ -253,19 +317,19 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
 
   // 创建两个隐藏容器
   const c1 = document.createElement('div');
-  c1.style.cssText = 'position:fixed;left:-9999px;top:0;';
+  c1.style.cssText = 'position:fixed;left:-9999px;top:0;width:680px;min-width:680px;max-width:680px;-webkit-text-size-adjust:none;text-size-adjust:none;';
   c1.innerHTML = page1HTML;
   document.body.appendChild(c1);
 
   const c2 = document.createElement('div');
-  c2.style.cssText = 'position:fixed;left:-9999px;top:0;';
+  c2.style.cssText = 'position:fixed;left:-9999px;top:0;width:680px;min-width:680px;max-width:680px;-webkit-text-size-adjust:none;text-size-adjust:none;';
   c2.innerHTML = page2HTML;
   document.body.appendChild(c2);
 
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
   script.onload = function() {
-    const opts = { scale: 2, useCORS: true, backgroundColor: '#ffffff' };
+    const opts = { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 680, windowWidth: 1200 };
     Promise.all([html2canvas(c1, opts), html2canvas(c2, opts)]).then(([canvas1, canvas2]) => {
       document.body.removeChild(c1);
       document.body.removeChild(c2);
@@ -309,18 +373,18 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       addCanvasPages(pdf, canvas2, true);
 
       const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        // iOS: 打开新标签页显示 PDF，用户通过分享按钮保存
-        const blob = pdf.output('blob');
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.click();
-        showToast('✅ PDF已生成，请长按预览页面保存');
+      pdf.setProperties({
+        title: fileName,
+        subject: '保单被保险人声明书',
+        creator: '被保险人声明书生成器'
+      });
+      const blob = pdf.output('blob');
+      storeGeneratedPDF(blob, fileName);
+
+      if (isIOSDevice()) {
+        // iOS 分享临时 blob: 链接时会产生无后缀书签文件；改为由用户分享真正的 File 对象。
+        document.getElementById('pdfActions').style.display = 'block';
+        showToast('✅ PDF 已生成，请点击“分享 / 保存 PDF”');
       } else {
         pdf.save(fileName);
         showToast('✅ PDF已生成并开始下载');
