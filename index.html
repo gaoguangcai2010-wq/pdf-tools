@@ -301,8 +301,19 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       }
       
       const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
-      pdf.save(fileName);
-      showToast('✅ PDF已生成并开始下载');
+      
+      // iOS Safari 不支持 pdf.save()，改用新标签页打开
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        showToast('✅ PDF已生成，请点击分享按钮保存');
+      } else {
+        pdf.save(fileName);
+        showToast('✅ PDF已生成并开始下载');
+      }
     }).catch(err => {
       document.body.removeChild(container);
       showToast('生成失败：' + err.message, true);
