@@ -273,17 +273,31 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfW = 210;
+      const pageH = 297;
 
-      // 第一页：正文
-      const img1 = canvas1.toDataURL('image/jpeg', 0.95);
-      const h1 = (canvas1.height * pdfW) / canvas1.width;
-      pdf.addImage(img1, 'JPEG', 0, 0, pdfW, h1);
+      // 辅助函数：将超出一页的内容自动分页
+      function addCanvasToPDF(pdf, canvas, isFirst) {
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const fullH = (canvas.height * pdfW) / canvas.width;
+        if (!isFirst) pdf.addPage();
+        if (fullH <= pageH) {
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, fullH);
+        } else {
+          let offset = 0;
+          let remaining = fullH;
+          while (remaining > 0) {
+            if (offset > 0) pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, -offset, pdfW, fullH);
+            remaining -= pageH;
+            offset += pageH;
+          }
+        }
+      }
 
-      // 第二页：附件
-      pdf.addPage();
-      const img2 = canvas2.toDataURL('image/jpeg', 0.95);
-      const h2 = (canvas2.height * pdfW) / canvas2.width;
-      pdf.addImage(img2, 'JPEG', 0, 0, pdfW, h2);
+      // 第一页起：正文（可能占多页）
+      addCanvasToPDF(pdf, canvas1, true);
+      // 附件（新页开始，也可能占多页）
+      addCanvasToPDF(pdf, canvas2, false);
 
       const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
