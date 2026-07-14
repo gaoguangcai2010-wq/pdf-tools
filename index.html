@@ -275,38 +275,52 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       const pdfW = 210;
       const pageH = 297;
 
-      // 辅助函数：将超出一页的内容自动分页
-      function addCanvasToPDF(pdf, canvas, isFirst) {
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const fullH = (canvas.height * pdfW) / canvas.width;
-        if (!isFirst) pdf.addPage();
-        if (fullH <= pageH) {
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, fullH);
-        } else {
-          let offset = 0;
-          let remaining = fullH;
-          while (remaining > 0) {
-            if (offset > 0) pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, -offset, pdfW, fullH);
-            remaining -= pageH;
-            offset += pageH;
-          }
+      // 辅助函数：用临时 canvas 裁切每页内容，确保不截断
+      function addCanvasPages(pdf, canvas, needNewPage) {
+        const scale = canvas.width / pdfW;  // px per mm
+        const totalH_mm = canvas.height / scale;
+        const totalPages = Math.ceil(totalH_mm / pageH);
+
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0 || needNewPage) pdf.addPage();
+          // 本页在源 canvas 中的起始/结束像素
+          const srcY = Math.round(i * pageH * scale);
+          const srcH = Math.min(Math.round(pageH * scale), canvas.height - srcY);
+          // 本页在 PDF 中的高度
+          const destH = srcH / scale;
+
+          // 用临时 canvas 精确裁切本页区域
+          const tmp = document.createElement('canvas');
+          tmp.width = canvas.width;
+          tmp.height = srcH;
+          const ctx = tmp.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, tmp.width, tmp.height);
+          ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+
+          const imgData = tmp.toDataURL('image/jpeg', 0.95);
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, destH);
         }
       }
 
-      // 第一页起：正文（可能占多页）
-      addCanvasToPDF(pdf, canvas1, true);
-      // 附件（新页开始，也可能占多页）
-      addCanvasToPDF(pdf, canvas2, false);
+      // 正文（可能占多页）
+      addCanvasPages(pdf, canvas1, false);
+      // 附件（新页开始）
+      addCanvasPages(pdf, canvas2, true);
 
       const fileName = `被保险人声明书_${insured}_${new Date().toISOString().slice(0,10)}.pdf`;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (isIOS) {
-        // iOS: 导航到 blob URL，Safari 会显示内置 PDF 阅读器，用分享按钮保存
+        // iOS: 打开新标签页显示 PDF，用户通过分享按钮保存
         const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
-        window.location.href = url;
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.click();
+        showToast('✅ PDF已生成，请长按预览页面保存');
       } else {
         pdf.save(fileName);
         showToast('✅ PDF已生成并开始下载');
