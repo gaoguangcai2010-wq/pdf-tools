@@ -5,113 +5,118 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>被保险人声明书生成器</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 <style>
-:root { --navy: #15335f; --blue: #2f67c7; --blue-dark: #2355ad; --ink: #17233b; --muted: #69758b; --line: #e3eaf4; --surface: #ffffff; --soft-blue: #f3f7fd; --green: #16865f; }
+:root { --sdhs-green: #009b63; --sdhs-orange: #ef6d22; --sdhs-blue: #0878bd; --sdhs-blue-dark: #0069a8; --ink: #242b35; --muted: #7b8492; --line: #d9dee7; --page: #f0f3f6; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; color: var(--ink); background: radial-gradient(circle at 15% -10%, #dbe9ff 0, transparent 34%), radial-gradient(circle at 100% 10%, #e8f1ff 0, transparent 28%), #f4f7fb; min-height: 100vh; padding: 28px 16px 40px; }
-button, input { font: inherit; }
+body { min-height: 100vh; padding: 24px 14px 40px; color: var(--ink); background: var(--page); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+button, input, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
-.container { width: 100%; max-width: 680px; margin: 0 auto; }
-.hero { position: relative; overflow: hidden; margin-bottom: 18px; padding: 28px; border: 1px solid rgba(255,255,255,0.28); border-radius: 24px; color: #fff; background: linear-gradient(135deg, #102d56 0%, #2455a4 62%, #3a79d8 100%); box-shadow: 0 20px 48px rgba(25, 67, 129, 0.22); }
-.hero::after { content: ""; position: absolute; width: 210px; height: 210px; right: -68px; top: -92px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
-.brand-line { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 650; letter-spacing: 0.04em; }
-.brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; background: rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
-.eyebrow { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); font-size: 11px; }
-h1 { position: relative; z-index: 1; margin-bottom: 8px; font-size: clamp(24px, 5vw, 30px); line-height: 1.25; letter-spacing: -0.02em; }
-.subtitle { position: relative; z-index: 1; max-width: 470px; color: rgba(255,255,255,0.76); font-size: 14px; line-height: 1.7; }
-.hero-meta { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 20px; color: rgba(255,255,255,0.88); font-size: 12px; }
-.hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.hero-meta i { width: 5px; height: 5px; border-radius: 50%; background: #8fe3c3; box-shadow: 0 0 0 3px rgba(143,227,195,0.14); }
-.card { margin-bottom: 16px; padding: 22px; border: 1px solid rgba(220,229,241,0.9); border-radius: 20px; background: rgba(255,255,255,0.96); box-shadow: 0 10px 30px rgba(30, 58, 96, 0.07); }
-.card-title { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #edf1f6; }
-.step-badge { flex: 0 0 auto; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: #fff; background: linear-gradient(135deg, var(--navy), var(--blue)); box-shadow: 0 7px 16px rgba(47,103,199,0.22); font-size: 12px; font-weight: 750; letter-spacing: 0.04em; }
-.card-title strong { display: block; margin-bottom: 3px; font-size: 16px; color: var(--ink); }
-.card-title small { display: block; color: #8994a7; font-size: 12px; font-weight: 400; }
+.container { width: 100%; max-width: 680px; margin: 0 auto; overflow: hidden; background: #fff; box-shadow: 0 18px 48px rgba(40, 64, 84, 0.12); }
+.brand-header { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 10px 24px; border-bottom: 1px solid #edf0f3; background: #fff; }
+.brand-logo { display: block; width: 82px; height: 62px; object-fit: contain; }
+.brand-context { color: #343a43; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+.hero { position: relative; min-height: 218px; padding: 34px 28px 28px; color: #fff; background-color: var(--sdhs-blue); background-image: url("assets/sdhs-bridge-hero.jpg"); background-position: center right; background-size: cover; }
+.hero-copy { position: relative; z-index: 1; max-width: 410px; padding-left: 17px; border-left: 5px solid var(--sdhs-orange); }
+h1 { margin-bottom: 5px; font-size: 29px; line-height: 1.24; letter-spacing: 0.01em; }
+.hero-english { margin-bottom: 18px; color: rgba(255,255,255,0.92); font-size: 14px; letter-spacing: 0.04em; }
+.subtitle { max-width: 350px; color: rgba(255,255,255,0.92); font-size: 14px; line-height: 1.65; }
+.form-surface { padding: 24px 28px 10px; }
+.card { padding: 0 0 24px; background: #fff; }
+.card + .card { padding-top: 4px; border-top: 1px solid #e1e5eb; }
+.card-title { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-top: 8px; }
+.card-title::after { content: ""; flex: 1; height: 1px; background: #d9dee5; }
+.step-badge { flex: 0 0 auto; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; color: #fff; background: var(--sdhs-green); font-size: 16px; font-weight: 750; }
+.card-title strong { display: block; margin-bottom: 2px; color: #242a32; font-size: 18px; }
+.card-title small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
 .form-group { margin-bottom: 16px; }
-.form-group label { display: block; margin-bottom: 7px; color: #48566c; font-size: 13px; font-weight: 620; }
-.form-group label .req { margin-left: 3px; color: #e05252; }
-.form-group input { width: 100%; height: 46px; padding: 0 14px; border: 1px solid #dce4ef; border-radius: 11px; outline: none; color: var(--ink); background: #f9fbfd; font-size: 15px; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; }
-.form-group input::placeholder { color: #a5afbd; }
-.form-group input:focus { border-color: #5b85d5; background: #fff; box-shadow: 0 0 0 4px rgba(47,103,199,0.10); }
+.form-group label { display: block; margin-bottom: 7px; color: #303640; font-size: 14px; font-weight: 620; }
+.form-group label .req { margin-left: 4px; color: #e13d3d; }
+.form-group input, .form-group select { width: 100%; height: 46px; padding: 0 14px; border: 1px solid #d2d8e1; border-radius: 8px; outline: none; color: #232a33; background: #fff; font-size: 15px; transition: border-color 0.18s, box-shadow 0.18s; }
+.form-group select { appearance: auto; color: #303640; }
+.form-group input::placeholder { color: #a6aebb; }
+.form-group input:focus, .form-group select:focus { border-color: var(--sdhs-blue); box-shadow: 0 0 0 3px rgba(8,120,189,0.10); }
 .form-row { display: flex; gap: 14px; }
 .form-row .form-group { flex: 1; min-width: 0; }
-.vehicle-item { position: relative; margin-bottom: 12px; padding: 16px; border: 1px solid #e4ebf5; border-radius: 15px; background: linear-gradient(180deg, #f8faff, #fbfcfe); }
-.vehicle-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #7b879a; font-size: 12px; }
-.vehicle-index { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 24px; padding: 0 8px; border-radius: 7px; color: var(--blue-dark); background: #eaf1ff; font-weight: 700; }
-.vehicle-item .remove-btn { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 9px; color: #c94f55; background: #fff0f1; font-size: 18px; line-height: 1; cursor: pointer; transition: background 0.18s, color 0.18s; }
-.vehicle-item .remove-btn:hover { color: #fff; background: #d75d63; }
-.add-btn { width: 100%; padding: 12px; border: 1.5px dashed #85a7df; border-radius: 11px; color: var(--blue-dark); background: #f7faff; font-size: 14px; font-weight: 650; cursor: pointer; transition: background 0.18s, border-color 0.18s; }
-.add-btn:hover { border-color: var(--blue); background: #eef4ff; }
-.tip { margin-top: 8px; color: #96a0b0; font-size: 11px; text-align: center; }
-.submit-panel { padding: 22px; border-radius: 20px; color: #fff; background: linear-gradient(135deg, #132f5a, #244f96); box-shadow: 0 14px 34px rgba(24, 64, 124, 0.18); }
-.submit-copy { margin-bottom: 16px; }
-.submit-copy strong { display: block; margin-bottom: 4px; font-size: 16px; }
-.submit-copy span { color: rgba(255,255,255,0.68); font-size: 12px; }
-.generate-btn { width: 100%; padding: 14px 18px; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; color: #19355f; background: linear-gradient(180deg, #ffffff, #eef4ff); box-shadow: 0 8px 20px rgba(4,18,43,0.20); font-size: 16px; font-weight: 750; cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
-.generate-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(4,18,43,0.26); }
+.vehicle-item { position: relative; margin-bottom: 13px; padding: 15px 14px 14px; border: 1px solid #d6dce4; border-radius: 8px; background: #fff; }
+.vehicle-head { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; color: #7b8492; font-size: 13px; }
+.vehicle-index { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--sdhs-green); background: #e8f6f0; font-weight: 750; }
+.vehicle-item .remove-btn { position: absolute; top: 13px; right: 12px; display: inline-flex; align-items: center; gap: 4px; padding: 5px 7px; border: 0; color: #df4545; background: transparent; font-size: 13px; cursor: pointer; }
+.vehicle-item .remove-btn i { font-size: 17px; }
+.add-btn { width: 100%; height: 46px; border: 1px dashed #b8c1cc; border-radius: 7px; color: var(--sdhs-green); background: #fff; font-size: 14px; font-weight: 650; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
+.add-btn:hover { border-color: var(--sdhs-green); background: #f5fbf8; }
+.add-btn i, .generate-btn i { margin-right: 5px; font-size: 18px; vertical-align: -2px; }
+.tip { margin-top: 7px; color: #929aa6; font-size: 11px; text-align: center; }
+.submit-panel { padding: 0 28px 22px; background: #fff; }
+.submit-copy { display: none; }
+.generate-btn { width: 100%; height: 50px; border: 0; border-radius: 7px; color: #fff; background: var(--sdhs-blue); box-shadow: 0 8px 18px rgba(8,120,189,0.20); font-size: 16px; font-weight: 720; cursor: pointer; transition: background 0.18s, transform 0.18s; }
+.generate-btn:hover { background: var(--sdhs-blue-dark); transform: translateY(-1px); }
 .generate-btn:active { transform: translateY(0); }
 .generate-btn:disabled { opacity: 0.58; cursor: not-allowed; transform: none; }
-.pdf-actions { display: none; margin-top: 14px; padding: 15px; border: 1px solid rgba(143,227,195,0.32); border-radius: 13px; background: rgba(255,255,255,0.10); }
-.pdf-actions p { margin-bottom: 11px; color: #d9f8eb; font-size: 13px; line-height: 1.5; text-align: center; }
-.pdf-action-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; color: #fff; background: var(--green); font-size: 15px; font-weight: 700; cursor: pointer; }
-.pdf-action-btn.secondary { margin-top: 8px; border: 1px solid rgba(255,255,255,0.35); color: #fff; background: transparent; }
-.privacy-note { display: flex; justify-content: center; align-items: center; gap: 7px; margin-top: 14px; color: #8792a3; font-size: 11px; text-align: center; }
-.privacy-note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #41a47e; box-shadow: 0 0 0 3px rgba(65,164,126,0.11); }
-.toast { position: fixed; top: max(18px, env(safe-area-inset-top)); left: 50%; z-index: 9999; display: none; width: max-content; max-width: calc(100vw - 32px); padding: 11px 18px; transform: translateX(-50%); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; color: #fff; background: rgba(20,126,89,0.96); box-shadow: 0 12px 30px rgba(22,54,89,0.2); font-size: 13px; text-align: center; backdrop-filter: blur(10px); }
+.pdf-actions { display: none; margin-top: 13px; padding: 14px; border: 1px solid #cfe5dc; border-radius: 8px; background: #f3faf7; }
+.pdf-actions p { margin-bottom: 10px; color: #257456; font-size: 13px; line-height: 1.5; text-align: center; word-break: break-all; }
+.pdf-action-btn { width: 100%; height: 44px; border: 0; border-radius: 7px; color: #fff; background: var(--sdhs-green); font-size: 14px; font-weight: 680; cursor: pointer; }
+.pdf-action-btn.secondary { margin-top: 8px; border: 1px solid var(--sdhs-blue); color: var(--sdhs-blue); background: #fff; }
+.privacy-note { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 20px 22px; color: #8b939f; background: #fff; font-size: 11px; text-align: center; }
+.privacy-note i { color: #7f8d9c; font-size: 14px; }
+.toast { position: fixed; top: max(18px, env(safe-area-inset-top)); left: 50%; z-index: 9999; display: none; width: max-content; max-width: calc(100vw - 32px); padding: 11px 18px; transform: translateX(-50%); border-radius: 8px; color: #fff; background: rgba(0,132,83,0.96); box-shadow: 0 10px 24px rgba(35,55,75,0.20); font-size: 13px; text-align: center; }
 .toast.error { background: rgba(190,65,69,0.96); }
-.plate-color-group { display: flex; flex-wrap: wrap; gap: 8px; }
-.plate-color-btn { min-height: 34px; padding: 6px 12px; border: 1px solid #dce4ef; border-radius: 9px; color: #526077; background: #fff; font-size: 12px; cursor: pointer; transition: all 0.18s; }
-.plate-color-btn.active { border-color: var(--blue); color: var(--blue-dark); background: #edf4ff; box-shadow: 0 0 0 3px rgba(47,103,199,0.08); font-weight: 650; }
-.plate-color-btn[data-color="yellow"] { border-color: #f0c040; }
-.plate-color-btn[data-color="yellow"].active { background: #fffbe6; color: #b8860b; border-color: #f0c040; }
-.plate-color-btn[data-color="blue"] { border-color: #4a90d9; }
-.plate-color-btn[data-color="blue"].active { background: #e8f0fe; color: #2563eb; border-color: #4a90d9; }
-.plate-color-btn[data-color="gradient-green"] { border-color: #43a047; }
-.plate-color-btn[data-color="gradient-green"].active { background: #e8f5e9; color: #2e7d32; border-color: #43a047; }
-.plate-color-btn[data-color="yellow-green"] { border-color: #c0a030; }
-.plate-color-btn[data-color="yellow-green"].active { background: #f9f5e0; color: #8d6e12; border-color: #c0a030; }
-.plate-color-btn[data-color="green"] { border-color: #4caf50; }
-.plate-color-btn[data-color="green"].active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
-.plate-color-btn[data-color="white"] { border-color: #bbb; }
-.plate-color-btn[data-color="white"].active { background: #f5f5f5; color: #333; border-color: #999; }
-.plate-color-btn[data-color="black"] { border-color: #555; }
-.plate-color-btn[data-color="black"].active { background: #f0f0f0; color: #111; border-color: #333; }
-.pdf-render-root { width: 680px; min-width: 680px; max-width: 680px; box-sizing: border-box; font-family: "Songti SC", STSong, SimSun, serif; font-size: 14px; color: #000; background: #fff; -webkit-text-size-adjust: none; text-size-adjust: none; }
+.pdf-render-root { width: 680px; min-width: 680px; max-width: 680px; box-sizing: border-box; color: #000; background: #fff; font-family: "Songti SC", STSong, SimSun, serif; font-size: 14px; -webkit-text-size-adjust: none; text-size-adjust: none; }
 @media (max-width: 520px) {
-  body { padding: 12px 12px 28px; }
-  .hero { padding: 22px 18px; border-radius: 20px; }
-  .brand-line { margin-bottom: 20px; }
-  .eyebrow { font-size: 10px; }
-  .hero-meta { gap: 8px 14px; margin-top: 16px; }
-  .card { padding: 18px 16px; border-radius: 17px; }
-  .card-title { margin-bottom: 18px; }
-  .submit-panel { padding: 18px 16px; border-radius: 17px; }
-  .plate-color-btn { flex: 1 1 calc(33.333% - 8px); padding-left: 7px; padding-right: 7px; }
+  body { padding: 0 0 70px; background: #fff; }
+  .container { max-width: none; box-shadow: none; }
+  .brand-header { min-height: 56px; padding: 4px 16px; }
+  .brand-logo { width: 66px; height: 48px; }
+  .brand-context { font-size: 12px; }
+  .hero { min-height: 164px; padding: 21px 17px 18px; background-position: 58% center; }
+  .hero-copy { max-width: 300px; padding-left: 12px; border-left-width: 4px; }
+  h1 { font-size: 23px; }
+  .hero-english { margin-bottom: 9px; font-size: 11px; }
+  .subtitle { max-width: 268px; font-size: 12px; line-height: 1.5; }
+  .form-surface { padding: 15px 16px 3px; }
+  .card { padding-bottom: 15px; }
+  .card + .card { padding-top: 2px; }
+  .card-title { gap: 10px; margin-bottom: 13px; padding-top: 5px; }
+  .step-badge { width: 34px; height: 34px; font-size: 14px; }
+  .card-title strong { margin-bottom: 0; font-size: 16px; }
+  .card-title small { font-size: 11px; }
+  .form-group { margin-bottom: 10px; }
+  .form-group label { margin-bottom: 5px; font-size: 13px; }
+  .form-group input, .form-group select { height: 40px; padding: 0 12px; font-size: 13px; }
+  .form-row { gap: 11px; }
+  .vehicle-item { margin-bottom: 10px; padding: 11px 11px 10px; }
+  .vehicle-head { margin-bottom: 9px; }
+  .vehicle-index { min-width: 31px; height: 25px; }
+  .vehicle-item .remove-btn { top: 9px; right: 8px; }
+  .add-btn { height: 40px; }
+  .tip { margin-top: 5px; }
+  .submit-panel { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; width: 100%; max-width: 520px; margin: 0 auto; padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e7ec; background: #fff; box-shadow: 0 -8px 20px rgba(38,57,73,0.08); }
+  .generate-btn { height: 46px; }
+  .privacy-note { padding: 0 18px 13px; }
 }
-@media (max-width: 360px) {
+@media (max-width: 350px) {
+  .brand-context { font-size: 11px; }
   .form-row { display: block; }
-  .hero-meta { display: grid; grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <header class="hero">
-    <div class="brand-line">
-      <div class="brand"><span class="brand-mark">山</span><span>山高聚行</span></div>
-      <span class="eyebrow">车险分期 · 在线工具</span>
-    </div>
-    <h1>被保险人声明书</h1>
-    <p class="subtitle">填写业务信息与车辆资料，快速生成格式统一、可直接分享的 PDF 声明书。</p>
-    <div class="hero-meta">
-      <span><i></i>手机与电脑通用</span>
-      <span><i></i>本地生成 PDF</span>
-      <span><i></i>支持多车辆</span>
-    </div>
+  <header class="brand-header">
+    <img class="brand-logo" src="assets/sdhs-logo.png" alt="SDHS">
+    <span class="brand-context">山高聚行 · 车险分期</span>
   </header>
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>被保险人声明书</h1>
+      <p class="hero-english">INSURED DECLARATION</p>
+      <p class="subtitle">填写业务信息与车辆资料，快速生成并分享 PDF 声明书。</p>
+    </div>
+  </section>
+
+  <main class="form-surface">
 
   <!-- 基本信息 -->
   <section class="card">
@@ -146,21 +151,22 @@ h1 { position: relative; z-index: 1; margin-bottom: 8px; font-size: clamp(24px, 
       <div><strong>车辆信息</strong><small>支持车牌号或车架号，可添加多辆车</small></div>
     </div>
     <div id="vehicleList"></div>
-    <button type="button" class="add-btn" onclick="addVehicle()">＋ 添加一辆车</button>
+    <button type="button" class="add-btn" onclick="addVehicle()"><i class="ri-add-line" aria-hidden="true"></i>添加一辆车</button>
     <p class="tip">支持车牌号或车架号，至少添加1辆</p>
   </section>
+  </main>
 
   <!-- 生成按钮 -->
   <section class="submit-panel">
     <div class="submit-copy"><strong>生成并确认文件</strong><span>生成后可直接分享、下载或存储到“文件”</span></div>
-    <button type="button" class="generate-btn" onclick="generatePDF()">生成声明书 PDF</button>
+    <button type="button" class="generate-btn" onclick="generatePDF()"><i class="ri-file-pdf-2-line" aria-hidden="true"></i>生成声明书 PDF</button>
     <div class="pdf-actions" id="pdfActions">
       <p id="generatedFileHint">PDF 已生成，请选择分享或下载。</p>
       <button type="button" class="pdf-action-btn" onclick="shareGeneratedPDF()">分享 / 保存 PDF</button>
       <button type="button" class="pdf-action-btn secondary" onclick="downloadGeneratedPDF()">直接下载 PDF</button>
     </div>
   </section>
-  <p class="privacy-note">填写内容仅用于在当前设备生成文件</p>
+  <p class="privacy-note"><i class="ri-shield-check-line" aria-hidden="true"></i>填写内容仅用于在当前设备生成文件</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -190,7 +196,7 @@ function addVehicle() {
   div.className = 'vehicle-item';
   div.id = 'vehicle-' + id;
   div.innerHTML = `
-    <button type="button" class="remove-btn" aria-label="删除这辆车" onclick="removeVehicle(${id})">×</button>
+    <button type="button" class="remove-btn" aria-label="删除这辆车" onclick="removeVehicle(${id})"><i class="ri-delete-bin-line" aria-hidden="true"></i>删除</button>
     <div class="vehicle-head"><span class="vehicle-index">#${id}</span><span>车辆资料</span></div>
     <div class="form-group" style="margin-bottom:10px;">
       <label>车牌号 / 车架号<span class="req">*</span></label>
@@ -198,15 +204,16 @@ function addVehicle() {
     </div>
     <div class="form-group" style="margin-bottom:0;">
       <label>车牌颜色<span class="req">*</span></label>
-      <div class="plate-color-group">
-        <button type="button" class="plate-color-btn" data-color="yellow" onclick="selectColor(this)">🟡 黄色</button>
-        <button type="button" class="plate-color-btn" data-color="blue" onclick="selectColor(this)">🔵 蓝色</button>
-        <button type="button" class="plate-color-btn" data-color="gradient-green" onclick="selectColor(this)">🟩 渐变绿色</button>
-        <button type="button" class="plate-color-btn" data-color="yellow-green" onclick="selectColor(this)">🟨 黄绿双拼</button>
-        <button type="button" class="plate-color-btn" data-color="green" onclick="selectColor(this)">🟢 绿色</button>
-        <button type="button" class="plate-color-btn" data-color="white" onclick="selectColor(this)">⚪ 白色</button>
-        <button type="button" class="plate-color-btn" data-color="black" onclick="selectColor(this)">⚫ 黑色</button>
-      </div>
+      <select class="v-color" aria-label="车牌颜色">
+        <option value="">请选择车牌颜色</option>
+        <option value="yellow">黄色</option>
+        <option value="blue">蓝色</option>
+        <option value="gradient-green">渐变绿色</option>
+        <option value="yellow-green">黄绿双拼</option>
+        <option value="green">绿色</option>
+        <option value="white">白色</option>
+        <option value="black">黑色</option>
+      </select>
     </div>
   `;
   document.getElementById('vehicleList').appendChild(div);
@@ -221,13 +228,6 @@ function removeVehicle(id) {
   items.forEach((item, i) => {
     item.querySelector('.vehicle-index').textContent = '#' + (i + 1);
   });
-}
-
-function selectColor(btn) {
-  invalidateGeneratedPDF();
-  const group = btn.parentElement;
-  group.querySelectorAll('.plate-color-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
 }
 
 function showToast(msg, isError) {
@@ -271,7 +271,7 @@ function buildPdfFileName(insured) {
 function getCurrentFormSignature() {
   const vehicles = Array.from(document.querySelectorAll('.vehicle-item')).map(item => ({
     plate: item.querySelector('.v-plate').value.trim(),
-    color: item.querySelector('.plate-color-btn.active')?.dataset.color || ''
+    color: item.querySelector('.v-color').value
   }));
   return JSON.stringify({
     borrower: document.getElementById('borrower').value.trim(),
@@ -353,13 +353,13 @@ function generatePDF() {
   const vehicles = [];
   for (const item of vehicleItems) {
     const plate = item.querySelector('.v-plate').value.trim();
-    const colorBtn = item.querySelector('.plate-color-btn.active');
+    const colorSelect = item.querySelector('.v-color');
     if (!plate) { showToast('请填写所有车辆的车牌号/车架号', true); return; }
-    if (!colorBtn) { showToast('请选择所有车辆的车牌颜色', true); return; }
+    if (!colorSelect.value) { showToast('请选择所有车辆的车牌颜色', true); return; }
     vehicles.push({
       plate: plate,
-      colorKey: colorBtn.dataset.color,
-      color: colorMap[colorBtn.dataset.color]
+      colorKey: colorSelect.value,
+      color: colorMap[colorSelect.value]
     });
   }
 
@@ -527,6 +527,7 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles, fileName, 
 // 初始添加一辆车
 addVehicle();
 document.querySelector('.container').addEventListener('input', invalidateGeneratedPDF);
+document.querySelector('.container').addEventListener('change', invalidateGeneratedPDF);
 </script>
 </body>
 </html>
