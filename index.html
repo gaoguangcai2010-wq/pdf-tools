@@ -303,10 +303,10 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (isIOS) {
+        // iOS: 导航到 blob URL，Safari 会显示内置 PDF 阅读器，用分享按钮保存
         const blob = pdf.output('blob');
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        showToast('✅ PDF已生成，请点击分享按钮保存');
+        window.location.href = url;
       } else {
         pdf.save(fileName);
         showToast('✅ PDF已生成并开始下载');
