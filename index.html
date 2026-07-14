@@ -217,17 +217,17 @@ function generateFromHTML(borrower, insured, periods, rate, vehicles) {
 
   // 第一页：正文
   const page1HTML = `
-    <div style="width:680px;padding:40px 50px;font-family:SimSun,serif;font-size:14px;line-height:2;color:#000;background:#fff;">
-      <h2 style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:20px;">保单被保险人声明书</h2>
-      <p style="margin-bottom:10px;">致：山高聚行（北京）科技有限公司山东分公司</p>
-      <p style="text-indent:2em;margin-bottom:10px;">本公司作为车牌号（或车架号）为<u>附件1《车辆列表》内</u>的车辆（下称"该车辆"）之实际权利人，现就该车辆的商业险分期事宜作出如下声明与承诺：</p>
-      <p style="text-indent:2em;margin-bottom:10px;">一、本公司作为车辆的实际权利人，同意并认可该车辆以<b>${borrower}</b>名义作为办理主体，在贵司办理该车辆保险分期业务、签订相关合同等文件，即本公司同意该车辆的投保人为<b>山高聚行（北京）科技有限公司山东分公司</b>，被保险人为<b>${insured}</b>，且本公司无条件认可并接受投保人与办理主体之间签订的相关合同等文件之全部内容并愿意承担车辆权利人应承担的合同义务和责任。</p>
-      <p style="text-indent:2em;margin-bottom:10px;">二、本公司在此不可撤销地授权贵司作为该车辆的投保人办理商业险购买及相关手续。本公司承诺按照贵司与<b>${borrower}</b>签订的相关合同等文件所约定的分期方式支付保险分期费用。</p>
-      <p style="text-indent:2em;margin-bottom:10px;">三、本公司确认已知悉并同意保险分期业务的费率结构（服务费率${rateDisplay}、分期周期${periods}期），并承诺按照投保人与办理主体签署的分期协议约定，对系统中显示的被保险人为<b>${insured}</b>的全部未清偿的保险分期款项承担连带清偿责任，责任范围包括商业险保费、手续费及其他一切合理追偿费用。</p>
-      <p style="text-indent:2em;margin-bottom:10px;">四、本公司在此不可撤销地同意由投保人即<b>山高聚行（北京）科技有限公司山东分公司</b>在合同约定或法律规定的退保条件成就时直接发起退保，投保人发起退保时，出具本声明书的电子版影印件即视为我司已书面同意由投保人发起退保，我司不再主张被保险人在保单退保过程中的所有权益，所有退保权益均由投保人主张。退保车辆名单明细以<b>山高聚行（北京）科技有限公司山东分公司</b>提供为准。本公司已了解退保所带来的后果，并愿意承担本承诺所带来的结果及相关责任。</p>
-      <p style="text-indent:2em;margin-bottom:10px;">五、本公司知悉并了解中国相关法律规定,本公司上述声明内容全部系自愿做出的真实意思表示，不存在欺诈、胁迫、重大误解等情形，真实有效。</p>
-      <p style="text-align:center;margin:20px 0 30px;font-weight:bold;">特此声明。</p>
-      <p style="margin-bottom:40px;text-align:right;">声明人（签字/盖章）：</p>
+    <div style="width:680px;padding:30px 50px 20px;font-family:SimSun,serif;font-size:14px;line-height:1.8;color:#000;background:#fff;">
+      <h2 style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:14px;">保单被保险人声明书</h2>
+      <p style="margin-bottom:6px;">致：山高聚行（北京）科技有限公司山东分公司</p>
+      <p style="text-indent:2em;margin-bottom:6px;">本公司作为车牌号（或车架号）为<u>附件1《车辆列表》内</u>的车辆（下称"该车辆"）之实际权利人，现就该车辆的商业险分期事宜作出如下声明与承诺：</p>
+      <p style="text-indent:2em;margin-bottom:6px;">一、本公司作为车辆的实际权利人，同意并认可该车辆以<b>${borrower}</b>名义作为办理主体，在贵司办理该车辆保险分期业务、签订相关合同等文件，即本公司同意该车辆的投保人为<b>山高聚行（北京）科技有限公司山东分公司</b>，被保险人为<b>${insured}</b>，且本公司无条件认可并接受投保人与办理主体之间签订的相关合同等文件之全部内容并愿意承担车辆权利人应承担的合同义务和责任。</p>
+      <p style="text-indent:2em;margin-bottom:6px;">二、本公司在此不可撤销地授权贵司作为该车辆的投保人办理商业险购买及相关手续。本公司承诺按照贵司与<b>${borrower}</b>签订的相关合同等文件所约定的分期方式支付保险分期费用。</p>
+      <p style="text-indent:2em;margin-bottom:6px;">三、本公司确认已知悉并同意保险分期业务的费率结构（服务费率${rateDisplay}、分期周期${periods}期），并承诺按照投保人与办理主体签署的分期协议约定，对系统中显示的被保险人为<b>${insured}</b>的全部未清偿的保险分期款项承担连带清偿责任，责任范围包括商业险保费、手续费及其他一切合理追偿费用。</p>
+      <p style="text-indent:2em;margin-bottom:6px;">四、本公司在此不可撤销地同意由投保人即<b>山高聚行（北京）科技有限公司山东分公司</b>在合同约定或法律规定的退保条件成就时直接发起退保，投保人发起退保时，出具本声明书的电子版影印件即视为我司已书面同意由投保人发起退保，我司不再主张被保险人在保单退保过程中的所有权益，所有退保权益均由投保人主张。退保车辆名单明细以<b>山高聚行（北京）科技有限公司山东分公司</b>提供为准。本公司已了解退保所带来的后果，并愿意承担本承诺所带来的结果及相关责任。</p>
+      <p style="text-indent:2em;margin-bottom:6px;">五、本公司知悉并了解中国相关法律规定,本公司上述声明内容全部系自愿做出的真实意思表示，不存在欺诈、胁迫、重大误解等情形，真实有效。</p>
+      <p style="text-align:center;margin:14px 0 20px;font-weight:bold;">特此声明。</p>
+      <p style="margin-bottom:30px;text-align:right;">声明人（签字/盖章）：</p>
       <p style="text-align:right;">日期：${today}</p>
     </div>
   `;
